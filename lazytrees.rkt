@@ -1,12 +1,11 @@
 #lang racket
-
-;Lazy tree (LZT): 
+;Lazy tree (LZT):
 ;  A lazy tree is: empty-lzt is a lazy tree.
-;                  If n is a node, and lzt1...lztn are the lazy trees whose roots expand n for some node-expander, 
+;                  If n is a node, and lzt1...lztn are the lazy trees whose roots expand n for some node-expander,
 ;                      then (n lzt1 ... lztn) is a composite lazy tree
 ;                  If n cannot be expanded, then (n) is a leaf lazy tree.
 ;
-;  A lazy tree is represented as a "lazy tree-list" whose head is the root-node and whose tail is a 
+;  A lazy tree is represented as a "lazy tree-list" whose head is the root-node and whose tail is a
 ;  REGULAR list of lazy-trees:
 ;   (root (lambda () (list lzt1 lzt2 ... lztn)))
 ;  empty-lzt represents the empty lazy-tree
@@ -18,7 +17,7 @@
 ; (root (lambda () <a function which computes a list of children given a node>))
 ; A node expander has type: [Node -> List(Lzt(node))]
 ; On a leaf-node, the node expander returns empty.
-; On non-leaf nodes, the node expander returns a flat list of nodes. 
+; On non-leaf nodes, the node expander returns a flat list of nodes.
 ;
 ; That is - the node expander constructs a lazy tree given a function which computes the direct children of a node.
 ; The lzt constructor expand-lzt(node, node-expander) handles this uniform tree expansion method
@@ -55,13 +54,18 @@
   (lambda (root node-expander)
     (let ((children-nodes (node-expander root)))
       (make-lzt root
-                (lambda () (map (lambda (node) (expand-lzt node node-expander))
-                                children-nodes))))
-    )) 
+                (lambda ()
+                  (map (lambda (node) (expand-lzt node node-expander))
+                       children-nodes
+                  )
+                )
+       )
+    )
+  )
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Selectors
-
 
 ; Signature: lzt->root(lzt)
 ; Type: [LZT(Node) -> Node]
@@ -82,8 +86,8 @@
 ; Purpose: Selector of LZT(Node)
 ; Pre-conditions: -
 ; Tests: -
-(define lzt->branches 
-  (lambda (lzt) 
+(define lzt->branches
+  (lambda (lzt)
     ((cdr lzt))
     ))
 
@@ -122,10 +126,14 @@
 ; Pre-conditions: -
 ; Tests: -
 (define lzt?
-  (lambda (lzt) 
+  (lambda (lzt)
     (or (empty-lzt? lzt)
-        (and (pair? lzt) (procedure? (cdr lzt))))
-    ))
+        (and (pair? lzt)
+             (procedure? (cdr lzt))
+        )
+    )
+  )
+)
 
 ; Signature: leaf-lzt?(lzt)
 ; Type: [T -> Boolean]
@@ -133,9 +141,13 @@
 ; Pre-conditions: -
 ; Tests: -
 (define leaf-lzt?
-  (lambda (lzt) 
-    (and (lzt? lzt) (not (empty-lzt? lzt)) (empty? (lzt->branches lzt)))
-    ))
+  (lambda (lzt)
+    (and (lzt? lzt)
+         (not (empty-lzt? lzt))
+         (empty? (lzt->branches lzt))
+    )
+  )
+)
 
 ; Signature: composite-lzt?(lzt)
 ; Type: [T -> Boolean]
@@ -144,9 +156,14 @@
 ; Tests: -
 (define composite-lzt?
   (lambda (lzt)
+    ; (is_lzt and !is_empty and !is_leaf)
     (and (lzt? lzt)
-         (not (or (empty-lzt? lzt) (leaf-lzt? lzt))))
-    ))
+         (not (or (empty-lzt? lzt)
+                  (leaf-lzt? lzt)
+               ))
+    )
+  )
+)
 
 
 (define lzt->take-branches
@@ -154,10 +171,15 @@
     (cons (lzt->root lzt)
           (if (= n 0)
               (list)
-              (map (lambda (b) 
-                     (lzt->take-branches b (- n 1)))
-                   (lzt->branches lzt))))
-    ))
+              (map (lambda (b)
+                     (lzt->take-branches b (- n 1))
+                   )
+                   (lzt->branches lzt)
+              )
+          )
+    )
+  )
+)
                
 
 (define lzt->nth-level 
@@ -320,3 +342,4 @@
 ;; '(5 6 7 8 7 8 9 8 9 10)
 
 (define take-lzt "replace with code")
+
