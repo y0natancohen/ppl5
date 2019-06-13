@@ -215,12 +215,12 @@
 ; Tests: -
 (define lzt-find-first
   (lambda (lzt filterP)
-    (letrec ((collect 
+    (letrec ((collect
               (lambda (lzt)
                 (if (filterP (lzt->root lzt))
                     (lzt->root lzt)
                     (find-first-in-trees (lzt->branches lzt)))))
-             (find-first-in-trees 
+             (find-first-in-trees
               (lambda (lzts)
                 (cond ((empty? lzts) #f)
                       ((collect (car lzts)))
@@ -238,7 +238,7 @@
 (define lzt-filter->lzl
   (lambda (lzt filterP)
     (letrec (; [LZT(Node) -> LZL(Node)]
-             (collect 
+             (collect
               (lambda (lzt)
                 (if (filterP (lzt->root lzt))
                     (make-lzl (lzt->root lzt)
@@ -252,7 +252,7 @@
                     (let ((first-lzl (collect (first lzts))))
                       (if (empty-lzl? first-lzl)
                           (collect-in-trees (cdr lzts))
-                          (append-lzl first-lzl 
+                          (append-lzl first-lzl
                                       (lambda () (collect-in-trees (cdr lzts))))))))))
       (if (empty-lzt? lzt)
           empty-lzl
@@ -293,7 +293,7 @@
         empty-lzl
         (make-lzl (f (lzl->first lzl))
                   (lambda () (lzl-map f (lzl->rest lzl)))))))
-    
+
 ; Signature: lzl-append(lzl1, cont)
 ; Type: [LZL(T) * [()->LZL(T)] -> LZL(T)]
 ; Purpose: Append an LZL with a continuation returning an LZL.
@@ -309,7 +309,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; auxillary
 
-(define flatmap 
+(define flatmap
   (lambda (proc seq)
     (foldr append (list) (map proc seq))))
 
@@ -340,6 +340,62 @@
 ;; '(0 1 1 2 2 2 2 3)
 ;; > (take-lzt (testbig 5) 10)
 ;; '(5 6 7 8 7 8 9 8 9 10)
+(define take-lzt
+  (lambda (lzt n)
+    (take-lzt-helper lzt n 0)
+  )
+)
 
-(define take-lzt "replace with code")
+(define take-lzt-helper
+  (lambda (lzt n level)
+    (cond
+      ((= n 0) empty)
+      ((empty-lzt? lzt) empty)
+      (else
+        (let ((children (lzt->nth-level lzt level)))
+          (let ((len (length children)))
+            (cond
+              ((empty? children)
+                '()
+              )
+              ((> n len)
+                (append children (take-lzt-helper lzt (- n len) (+ level 1)))
+              )
+              (else
+                (take children n)
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+)
 
+
+(define t1
+  (cons 1 (lambda () '()))
+)
+(define t2
+  (cons 2 (lambda () '()))
+)
+(define t3
+  (cons 3 (lambda () '()))
+)
+(define r1
+  (cons 80 (lambda () (list t1 t2 t3)))
+)
+(define r2
+  (cons 90 (lambda () (list t1 t2 t3)))
+)
+(define s
+  (cons 400 (lambda () (list r1 r2 (testbig 5))))
+)
+
+(take-lzt s 2)
+(take-lzt s 4)
+(take-lzt s 6)
+(take-lzt s 8)
+(take-lzt s 10)
+(take-lzt s 13)
+(take-lzt s 20)
