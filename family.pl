@@ -82,6 +82,10 @@ relatives(Person1, Person2) :-
     ancestor(Anc, Person2),
     Person1\=Person2.
 
-
-% a query that returns all the female relatives of joseph:
-% relatives(isaac, Y), female(Y)
+% Signature: joseph_female_relatives(Person)/1
+% Purpose: returns all the female relatives of joseph.
+% Example:
+% ?- joseph_female_relatives(Y).
+% Y = abraham_sister ;
+joseph_female_relatives(Person) :-
+	relatives(Person, joseph), female(Person), Person\=joseph.
