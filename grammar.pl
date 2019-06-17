@@ -13,6 +13,7 @@
 % true
 % ?- sc(['(', '+', 1, 2, '(', '+', 1, 2, ')', ')']).				% (+ 1 2 (+ 1 2))
 % true
+
 % An example for the exercise of lambda implementation:
 % ?- sc(['(','+' , 1, '(', '+',  '(',  lambda, '(', ')', 3, ')', ')' , ')']).				% (+ 1 (+ (lambda () 3)))
 % true
@@ -26,6 +27,8 @@ atomc(X) :- stringc(X).
 
 compoundc(X) :-
 	regularformc(X).
+compoundc(X) :-
+	lambdac(X).
 
 % The append must appear first to avoid free recursion.
 % This is why there must be a precondition to sc/1.
@@ -51,3 +54,14 @@ stringc([X]) :-
 	atom(X),
 	X \= '(',    % Succeeds when X is not unifiable with '('
 	X \= ')'.
+
+manystringc([]).
+manystringc(Z) :-
+    append(X, Y, Z),
+    strinc(X),
+    manystringc(Y).
+
+lambdac(Z) :-
+    append([['(', 'lambda', '('], X, [')'], Y, [')']], Z),
+    manystringc(X),
+    manysc(Y).
