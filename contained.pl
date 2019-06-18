@@ -14,6 +14,5 @@ contained(SubList, List) :-
 
 containedOrdered(SubList, List) :-
     append(SubList, RandomList1, List),
-    SubList\=[].
+    List\=RandomList1.
 
-g
