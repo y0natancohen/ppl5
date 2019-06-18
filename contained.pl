@@ -8,5 +8,12 @@
 % X = [1];
 % X = [2];
 
-contained(X, Y) :-
-    writeln('not yet implemented').
+contained(SubList, List) :-
+    permutation(Perm, List),
+    containedOrdered(SubList, Perm).
+
+containedOrdered(SubList, List) :-
+    append(SubList, RandomList1, List),
+    SubList\=[].
+
+g
